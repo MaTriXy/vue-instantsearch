@@ -1,7 +1,7 @@
 import { createSuitMixin } from '../mixins/suit';
 import { version } from '../../package.json'; // rollup does pick only what needed from json
 import { _objectSpread } from './polyfills';
-import Vue from 'vue';
+import { isVue3, version as vueVersion } from './vue-compat';
 
 export const createInstantSearchComponent = component =>
   _objectSpread(
@@ -9,7 +9,7 @@ export const createInstantSearchComponent = component =>
       mixins: [createSuitMixin({ name: 'InstantSearch' })],
       provide() {
         return {
-          instantSearchInstance: this.instantSearchInstance,
+          $_ais_instantSearchInstance: this.instantSearchInstance,
         };
       },
       watch: {
@@ -30,15 +30,38 @@ export const createInstantSearchComponent = component =>
               'Please open a new issue: https://github.com/algolia/vue-instantsearch/issues/new?template=feature.md'
           );
         },
+        onStateChange() {
+          throw new Error(
+            'onStateChange configuration can not be changed dynamically at this point.' +
+              '\n\n' +
+              'Please open a new issue: https://github.com/algolia/vue-instantsearch/issues/new?template=feature.md'
+          );
+        },
         searchFunction(searchFunction) {
           // private InstantSearch.js API:
           this.instantSearchInstance._searchFunction = searchFunction;
+        },
+        middlewares: {
+          immediate: true,
+          handler(next, prev) {
+            (prev || [])
+              .filter(middleware => (next || []).indexOf(middleware) === -1)
+              .forEach(middlewareToRemove => {
+                this.instantSearchInstance.unuse(middlewareToRemove);
+              });
+
+            (next || [])
+              .filter(middleware => (prev || []).indexOf(middleware) === -1)
+              .forEach(middlewareToAdd => {
+                this.instantSearchInstance.use(middlewareToAdd);
+              });
+          },
         },
       },
       created() {
         const searchClient = this.instantSearchInstance.client;
         if (typeof searchClient.addAlgoliaAgent === 'function') {
-          searchClient.addAlgoliaAgent(`Vue (${Vue.version})`);
+          searchClient.addAlgoliaAgent(`Vue (${vueVersion})`);
           searchClient.addAlgoliaAgent(`Vue InstantSearch (${version})`);
         }
       },
@@ -52,19 +75,13 @@ export const createInstantSearchComponent = component =>
           }
         });
       },
-      beforeDestroy() {
+      [isVue3 ? 'beforeUnmount' : 'beforeDestroy']() {
         if (this.instantSearchInstance.started) {
           this.instantSearchInstance.dispose();
-
-          // TODO: remove this once algolia/instantsearch.js#3399 is used
-          this.instantSearchInstance.started = false;
-
-          // TODO: remove this once algolia/instantsearch.js#3415 is used
-          this.instantSearchInstance.helper = null;
         }
 
         // a hydrated instance will no longer be hydrated once disposed, and starts from scratch
-        this.instantSearchInstance.hydrated = false;
+        this.instantSearchInstance.__initialSearchResults = undefined;
       },
     },
     component

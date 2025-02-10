@@ -44,20 +44,22 @@ storiesOf('ais-sort-by', module)
           { value: 'instant_search_price_desc', label: 'Price desc.' },
         ]"
       >
-        <ul slot-scope="{ items, refine, currentRefinement}">
-          <li v-for="item in items" :key="item.value">
-            <button @click="refine(item.value)">
-              {{item.label}} {{currentRefinement === item.value ? '✔️' : ''}}
-            </button>
-          </li>
-        </ul>
+        <template v-slot="{ items, refine, currentRefinement}">
+          <ul>
+            <li v-for="item in items" :key="item.value">
+              <button @click="refine(item.value)">
+                {{item.label}} {{currentRefinement === item.value ? '✔️' : ''}}
+              </button>
+            </li>
+          </ul>
+        </template>
       </ais-sort-by>
     `,
   }))
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Sort By</template>
+        <template v-slot:header>Sort By</template>
         <ais-sort-by
           :items="[
             { value: 'instant_search', label: 'Featured' },
@@ -65,7 +67,7 @@ storiesOf('ais-sort-by', module)
             { value: 'instant_search_price_desc', label: 'Price desc.' },
           ]"
         />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

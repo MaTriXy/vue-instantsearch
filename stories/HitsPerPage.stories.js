@@ -51,31 +51,33 @@ storiesOf('ais-hits-per-page', module)
           { label: '6 results', value: 6 }
         ]"
       >
-        <div slot-scope="{ items, refine }">
-          <label
-            v-for="(item, itemIndex) in items"
-            @change="refine(item.value)"
-          >
-            <input
-              type="radio"
-              :checked="item.isRefined"
+        <template v-slot="{ items, refine }">
+          <div>
+            <label
+              v-for="(item, itemIndex) in items"
+              @change="refine(item.value)"
             >
-            {{item.label}}
-          </label>
-        </div>
+              <input
+                type="radio"
+                :checked="item.isRefined"
+              >
+              {{item.label}}
+            </label>
+          </div>
+        </template>
       </ais-hits-per-page>`,
   }))
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Hits per page</template>
+        <template v-slot:header>Hits per page</template>
         <ais-hits-per-page
           :items="[
             { label: '3 results', value: 3, default: true },
             { label: '6 results', value: 6 }
           ]"
         />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

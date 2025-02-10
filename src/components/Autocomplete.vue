@@ -28,15 +28,17 @@ import { createSuitMixin } from '../mixins/suit';
 export default {
   name: 'AisAutocomplete',
   mixins: [
-    createWidgetMixin({ connector: connectAutocomplete }),
+    createWidgetMixin(
+      {
+        connector: connectAutocomplete,
+      },
+      {
+        $$widgetType: 'ais.autocomplete',
+      }
+    ),
     createSuitMixin({ name: 'Autocomplete' }),
   ],
   props: {
-    indices: {
-      type: Array,
-      required: false,
-      default: undefined,
-    },
     escapeHTML: {
       type: Boolean,
       required: false,
@@ -46,7 +48,6 @@ export default {
   computed: {
     widgetParams() {
       return {
-        indices: this.indices,
         escapeHTML: this.escapeHTML,
       };
     },

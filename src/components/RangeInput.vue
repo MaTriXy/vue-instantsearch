@@ -1,17 +1,18 @@
 <template>
   <div
     v-if="state"
-    :class="[suit(), !canRefine && suit('', 'noRefinement')]"
+    :class="[suit(), !state.canRefine && suit('', 'noRefinement')]"
   >
     <slot
       :current-refinement="values"
       :refine="refine"
-      :can-refine="canRefine"
+      :can-refine="state.canRefine"
       :range="state.range"
+      :send-event="state.sendEvent"
     >
       <form
         :class="suit('form')"
-        @submit.prevent="refine({ min: minInput, max: maxInput })"
+        @submit.prevent="refine({ min: pick(minInput, values.min), max: pick(maxInput, values.max) })"
       >
         <label :class="suit('label')">
           <slot name="minLabel" />
@@ -59,17 +60,19 @@ import { createWidgetMixin } from '../mixins/widget';
 import { createPanelConsumerMixin } from '../mixins/panel';
 import { createSuitMixin } from '../mixins/suit';
 
-const mapStateToCanRefine = state =>
-  state && state.range && state.range.min !== state.range.max;
-
 export default {
   name: 'AisRangeInput',
   mixins: [
     createSuitMixin({ name: 'RangeInput' }),
-    createWidgetMixin({ connector: connectRange }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectRange,
+      },
+      {
+        $$widgetType: 'ais.rangeInput',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     attribute: {
@@ -79,12 +82,12 @@ export default {
     min: {
       type: Number,
       required: false,
-      default: -Infinity,
+      default: undefined,
     },
     max: {
       type: Number,
       required: false,
-      default: Infinity,
+      default: undefined,
     },
     precision: {
       type: Number,
@@ -98,6 +101,10 @@ export default {
       maxInput: undefined,
     };
   },
+  updated() {
+    this.minInput = undefined;
+    this.maxInput = undefined;
+  },
   computed: {
     widgetParams() {
       return {
@@ -107,9 +114,6 @@ export default {
         precision: this.precision,
       };
     },
-    canRefine() {
-      return mapStateToCanRefine(this.state);
-    },
     step() {
       return 1 / Math.pow(10, this.precision);
     },
@@ -118,12 +122,23 @@ export default {
       const { min: minRange, max: maxRange } = this.state.range;
 
       return {
-        min: minValue !== -Infinity && minValue !== minRange ? minValue : null,
-        max: maxValue !== Infinity && maxValue !== maxRange ? maxValue : null,
+        min:
+          minValue !== -Infinity && minValue !== minRange
+            ? minValue
+            : undefined,
+        max:
+          maxValue !== Infinity && maxValue !== maxRange ? maxValue : undefined,
       };
     },
   },
   methods: {
+    pick(first, second) {
+      if (first !== null && first !== undefined) {
+        return first;
+      } else {
+        return second;
+      }
+    },
     refine({ min, max }) {
       this.state.refine([min, max]);
     },

@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { mount } from '../../../test/utils';
 import { __setState } from '../../mixins/widget';
 import Toggle from '../ToggleRefinement.vue';
 
@@ -13,6 +13,7 @@ const defaultValue = {
 
 const defaultState = {
   value: defaultValue,
+  canRefine: true,
   refine: () => {},
   createURL: () => {},
 };
@@ -82,6 +83,7 @@ describe('default render', () => {
   it('renders correctly without refinement (with 0)', () => {
     __setState({
       ...defaultState,
+      canRefine: false,
       value: {
         ...defaultValue,
         count: 0,
@@ -98,6 +100,7 @@ describe('default render', () => {
   it('renders correctly without refinement (with null)', () => {
     __setState({
       ...defaultState,
+      canRefine: false,
       value: {
         ...defaultValue,
         count: null,
@@ -160,60 +163,60 @@ describe('default render', () => {
     expect(refine).toHaveBeenCalled();
     expect(refine).toHaveBeenCalledWith(defaultValue);
   });
+});
 
-  it('calls the Panel mixin with `value.count`', () => {
-    __setState({
-      ...defaultState,
-      value: {
-        // Otherwise setData update the default value
-        // and impact the other tests. We should not
-        // rely on a global state for the tests.
-        ...defaultValue,
-      },
-    });
-
-    const wrapper = mount(Toggle, {
-      propsData: defaultProps,
-    });
-
-    const mapStateToCanRefine = () =>
-      wrapper.vm.mapStateToCanRefine(wrapper.vm.state);
-
-    expect(mapStateToCanRefine()).toBe(true);
-
-    wrapper.setData({
-      state: {
-        value: {
-          count: 0,
-        },
-      },
-    });
-
-    expect(mapStateToCanRefine()).toBe(false);
+it('exposes send-event method for insights middleware', async () => {
+  const sendEvent = jest.fn();
+  __setState({
+    ...defaultState,
+    sendEvent,
   });
+
+  const wrapper = mount({
+    components: { Toggle },
+    data() {
+      return { props: defaultProps };
+    },
+    template: `
+      <Toggle v-bind="props">
+        <template v-slot="{ sendEvent }">
+          <button @click="sendEvent()">Send Event</button>
+        </template>
+      </Toggle>
+    `,
+  });
+
+  await wrapper.find('button').trigger('click');
+  expect(sendEvent).toHaveBeenCalledTimes(1);
 });
 
 describe('custom default render', () => {
-  const defaultScopedSlot = `
-    <a
-      slot-scope="{ value, canRefine, refine, createURL }"
-      :href="createURL()"
-      :class="[!canRefine && 'noRefinement']"
-      @click.prevent="refine(value)"
-    >
-      <span>{{ value.name }}</span>
-      <span>{{ value.isRefined ? '(is enabled)' : '(is disabled)' }}</span>
-    </a>
+  const defaultSlot = `
+    <template v-slot="{ value, canRefine, refine, createURL }">
+      <a
+        :href="createURL()"
+        :class="[!canRefine && 'noRefinement']"
+        @click.prevent="refine(value)"
+      >
+        <span>{{ value.name }}</span>
+        <span>{{ value.isRefined ? '(is enabled)' : '(is disabled)' }}</span>
+      </a>
+    </template>
   `;
 
   it('renders correctly', () => {
     __setState({ ...defaultState });
 
-    const wrapper = mount(Toggle, {
-      propsData: defaultProps,
-      scopedSlots: {
-        default: defaultScopedSlot,
+    const wrapper = mount({
+      components: { Toggle },
+      data() {
+        return { props: defaultProps };
       },
+      template: `
+        <Toggle v-bind="props">
+          ${defaultSlot}
+        </Toggle>
+      `,
     });
 
     expect(wrapper.html()).toMatchSnapshot();
@@ -222,17 +225,23 @@ describe('custom default render', () => {
   it('renders correctly without refinement', () => {
     __setState({
       ...defaultState,
+      canRefine: false,
       value: {
         ...defaultValue,
         count: 0,
       },
     });
 
-    const wrapper = mount(Toggle, {
-      propsData: defaultProps,
-      scopedSlots: {
-        default: defaultScopedSlot,
+    const wrapper = mount({
+      components: { Toggle },
+      data() {
+        return { props: defaultProps };
       },
+      template: `
+        <Toggle v-bind="props">
+          ${defaultSlot}
+        </Toggle>
+      `,
     });
 
     expect(wrapper.html()).toMatchSnapshot();
@@ -244,11 +253,16 @@ describe('custom default render', () => {
       createURL: () => `/free-shipping`,
     });
 
-    const wrapper = mount(Toggle, {
-      propsData: defaultProps,
-      scopedSlots: {
-        default: defaultScopedSlot,
+    const wrapper = mount({
+      components: { Toggle },
+      data() {
+        return { props: defaultProps };
       },
+      template: `
+        <Toggle v-bind="props">
+          ${defaultSlot}
+        </Toggle>
+      `,
     });
 
     expect(wrapper.html()).toMatchSnapshot();
@@ -263,17 +277,22 @@ describe('custom default render', () => {
       },
     });
 
-    const wrapper = mount(Toggle, {
-      propsData: defaultProps,
-      scopedSlots: {
-        default: defaultScopedSlot,
+    const wrapper = mount({
+      components: { Toggle },
+      data() {
+        return { props: defaultProps };
       },
+      template: `
+        <Toggle v-bind="props">
+          ${defaultSlot}
+        </Toggle>
+      `,
     });
 
     expect(wrapper.html()).toMatchSnapshot();
   });
 
-  it('calls refine on link click', () => {
+  it('calls refine on link click', async () => {
     const refine = jest.fn();
 
     __setState({
@@ -281,14 +300,19 @@ describe('custom default render', () => {
       refine,
     });
 
-    const wrapper = mount(Toggle, {
-      propsData: defaultProps,
-      scopedSlots: {
-        default: defaultScopedSlot,
+    const wrapper = mount({
+      components: { Toggle },
+      data() {
+        return { props: defaultProps };
       },
+      template: `
+        <Toggle v-bind="props">
+          ${defaultSlot}
+        </Toggle>
+      `,
     });
 
-    wrapper.find('a').trigger('click');
+    await wrapper.find('a').trigger('click');
 
     expect(refine).toHaveBeenCalledTimes(1);
     expect(refine).toHaveBeenCalledWith(defaultValue);

@@ -6,9 +6,14 @@ export default {
   name: 'AisQueryRuleContext',
   mixins: [
     createSuitMixin({ name: 'QueryRuleContext' }),
-    createWidgetMixin({
-      connector: connectQueryRules,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectQueryRules,
+      },
+      {
+        $$widgetType: 'ais.queryRuleContext',
+      }
+    ),
   ],
   props: {
     trackedFilters: {
@@ -18,7 +23,7 @@ export default {
     transformRuleContexts: {
       type: Function,
       required: false,
-      default: ruleContexts => ruleContexts,
+      default: undefined,
     },
   },
   computed: {

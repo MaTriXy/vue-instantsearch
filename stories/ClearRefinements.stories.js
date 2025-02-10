@@ -41,29 +41,30 @@ storiesOf('ais-clear-refinements', module)
   .add('with a custom label', () => ({
     template: `
       <ais-clear-refinements>
-        <template slot="resetLabel">Remove the refinements</template>
+        <template v-slot:resetLabel>Remove the refinements</template>
       </ais-clear-refinements>
     `,
   }))
   .add('with a custom render', () => ({
     template: `
       <ais-clear-refinements>
-        <button
-          slot-scope="{ canRefine, refine }"
-          :disabled="!canRefine"
-          @click="refine()"
-        >
-          Clear the search query
-        </button>
+        <template v-slot="{ canRefine, refine }">
+          <button
+            :disabled="!canRefine"
+            @click="refine()"
+          >
+            Clear the search query
+          </button>
+        </template>
       </ais-clear-refinements>
     `,
   }))
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Clear refinements</template>
+        <template v-slot:header>Clear refinements</template>
         <ais-clear-refinements :clearsQuery="true" />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

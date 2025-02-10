@@ -1,14 +1,25 @@
+import { _objectSpread } from '../util/polyfills';
+import { isVue3 } from '../util/vue-compat';
 import { warn } from '../util/warn';
 
-export const createWidgetMixin = ({ connector } = {}) => ({
+export const createWidgetMixin = (
+  { connector } = {},
+  additionalProperties = {}
+) => ({
   inject: {
     instantSearchInstance: {
-      name: 'instantSearchInstance',
+      from: '$_ais_instantSearchInstance',
       default() {
         const tag = this.$options._componentTag;
         throw new TypeError(
           `It looks like you forgot to wrap your Algolia search component "<${tag}>" inside of an "<ais-instant-search>" component.`
         );
+      },
+    },
+    getParentIndex: {
+      from: '$_ais_getParentIndex',
+      default() {
+        return () => this.instantSearchInstance.mainIndex;
       },
     },
   },
@@ -20,17 +31,25 @@ export const createWidgetMixin = ({ connector } = {}) => ({
   created() {
     if (typeof connector === 'function') {
       this.factory = connector(this.updateState, () => {});
-      this.widget = this.factory(this.widgetParams);
-      this.instantSearchInstance.addWidget(this.widget);
+      this.widget = _objectSpread(
+        this.factory(this.widgetParams),
+        additionalProperties
+      );
+      this.getParentIndex().addWidgets([this.widget]);
 
-      const { hydrated, started } = this.instantSearchInstance;
-      if ((!started && hydrated) || this.$isServer) {
+      if (
+        this.instantSearchInstance._initialResults &&
+        !this.instantSearchInstance.started
+      ) {
         if (typeof this.instantSearchInstance.__forceRender !== 'function') {
           throw new Error(
             'You are using server side rendering with <ais-instant-search> instead of <ais-instant-search-ssr>.'
           );
         }
-        this.instantSearchInstance.__forceRender(this.widget);
+        this.instantSearchInstance.__forceRender(
+          this.widget,
+          this.getParentIndex()
+        );
       }
     } else if (connector !== true) {
       warn(
@@ -44,25 +63,21 @@ Read more on using connectors: https://alg.li/vue-custom`
       );
     }
   },
-  beforeDestroy() {
-    if (
-      this.widget &&
-      this.widget.dispose &&
-      this.instantSearchInstance.started // a widget can't be removed if IS is not started
-    ) {
-      this.instantSearchInstance.removeWidget(this.widget);
+  [isVue3 ? 'beforeUnmount' : 'beforeDestroy']() {
+    if (this.widget) {
+      this.getParentIndex().removeWidgets([this.widget]);
     }
   },
   watch: {
     widgetParams: {
       handler(nextWidgetParams) {
         this.state = null;
-        // a widget can't be removed if IS is not started
-        if (this.widget.dispose && this.instantSearchInstance.started) {
-          this.instantSearchInstance.removeWidget(this.widget);
-        }
-        this.widget = this.factory(nextWidgetParams);
-        this.instantSearchInstance.addWidget(this.widget);
+        this.getParentIndex().removeWidgets([this.widget]);
+        this.widget = _objectSpread(
+          this.factory(nextWidgetParams),
+          additionalProperties
+        );
+        this.getParentIndex().addWidgets([this.widget]);
       },
       deep: true,
     },

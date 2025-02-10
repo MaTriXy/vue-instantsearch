@@ -11,6 +11,7 @@
       :refine="state.refine"
       :createURL="state.createURL"
       :toggle-show-more="state.toggleShowMore"
+      :send-event="state.sendEvent"
     >
       <ul :class="suit('list')">
         <li
@@ -54,10 +55,13 @@ export default {
   name: 'AisMenu',
   mixins: [
     createSuitMixin({ name: 'Menu' }),
-    createWidgetMixin({ connector: connectMenu }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => state.canRefine,
-    }),
+    createWidgetMixin(
+      { connector: connectMenu },
+      {
+        $$widgetType: 'ais.menu',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     attribute: {
@@ -71,11 +75,11 @@ export default {
     // },
     limit: {
       type: Number,
-      default: 10,
+      default: undefined,
     },
     showMoreLimit: {
       type: Number,
-      default: 20,
+      default: undefined,
     },
     showMore: {
       type: Boolean,
@@ -83,15 +87,11 @@ export default {
     },
     sortBy: {
       type: [Array, Function],
-      default() {
-        return ['count:desc', 'name:asc'];
-      },
+      default: undefined,
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   computed: {

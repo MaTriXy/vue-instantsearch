@@ -7,6 +7,8 @@
       :items="state.items"
       :refine="state.refine"
       :createURL="state.createURL"
+      :send-event="state.sendEvent"
+      :can-refine="state.canRefine"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +35,7 @@
           :class="[suit('item'), item.isRefined && suit('item', 'selected')]"
         >
           <a
-            :href="state.createURL(item)"
+            :href="state.createURL(item.value)"
             :aria-label="`${item.value} & Up`"
             :class="suit('link')"
             @click.prevent="state.refine(item.value)"
@@ -45,7 +47,7 @@
                 width="24"
                 height="24"
                 :class="[suit('starIcon'), suit('starIcon--full')]"
-                :key="n"
+                :key="n + '-full'"
               >
                 <use xlink:href="#ais-RatingMenu-starSymbol" />
               </svg>
@@ -56,7 +58,7 @@
                 aria-hidden="true"
                 width="24"
                 height="24"
-                :key="n"
+                :key="n + '-empty'"
               >
                 <use xlink:href="#ais-RatingMenu-starEmptySymbol" />
               </svg>
@@ -86,10 +88,15 @@ export default {
   name: 'AisRatingMenu',
   mixins: [
     createSuitMixin({ name: 'RatingMenu' }),
-    createWidgetMixin({ connector: connectRatingMenu }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => !state.hasNoResults,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectRatingMenu,
+      },
+      {
+        $$widgetType: 'ais.ratingMenu',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     attribute: {
@@ -98,7 +105,7 @@ export default {
     },
     max: {
       type: Number,
-      default: 5,
+      default: undefined,
     },
   },
   computed: {

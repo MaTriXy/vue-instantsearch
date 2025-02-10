@@ -4,16 +4,18 @@
   "description": "Vue InstantSearch & Nuxt",
   "private": true,
   "scripts": {
+    "serve": "yarn dev",
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "algoliasearch": "4.0.0-beta.14",
+    "algoliasearch": "^4.0.1",
     "cross-env": "^5.2.0",
     "nuxt": "^2.4.5",
-    "vue-instantsearch": "^2.0.0"
+    "vue-instantsearch": "file:../../",
+    "vue-server-renderer": "2.6.11"
   },
   "devDependencies": {}
 }

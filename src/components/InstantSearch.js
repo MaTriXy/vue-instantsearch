@@ -1,6 +1,7 @@
 import instantsearch from 'instantsearch.js/es';
 import { createInstantSearchComponent } from '../util/createInstantSearchComponent';
 import { warn } from '../util/warn';
+import { renderCompat, getDefaultSlot } from '../util/vue-compat';
 
 const oldApiWarning = `Vue InstantSearch: You used the prop api-key or app-id.
 These have been replaced by search-client.
@@ -16,22 +17,21 @@ export default createInstantSearchComponent({
     },
     insightsClient: {
       type: Function,
-      required: false,
+      default: undefined,
     },
     indexName: {
       type: String,
       required: true,
     },
     routing: {
-      default: null,
+      default: undefined,
       validator(value) {
         if (
           typeof value === 'boolean' ||
-          !value.router ||
-          !value.stateMapping
+          (!value.router && !value.stateMapping)
         ) {
           warn(
-            'routing should be an object, with `router` and `stateMapping`. See https://www.algolia.com/doc/api-reference/widgets/instantsearch/vue/#widget-param-routing'
+            'The `routing` option expects an object with `router` and/or `stateMapping`.\n\nSee https://www.algolia.com/doc/api-reference/widgets/instantsearch/vue/#widget-param-routing'
           );
           return false;
         }
@@ -40,16 +40,23 @@ export default createInstantSearchComponent({
     },
     stalledSearchDelay: {
       type: Number,
-      default: 200,
+      default: undefined,
     },
     searchFunction: {
       type: Function,
-      default: null,
+      default: undefined,
     },
-
+    onStateChange: {
+      type: Function,
+      default: undefined,
+    },
+    initialUiState: {
+      type: Object,
+      default: undefined,
+    },
     apiKey: {
       type: String,
-      default: null,
+      default: undefined,
       validator(value) {
         if (value) {
           warn(oldApiWarning);
@@ -59,13 +66,17 @@ export default createInstantSearchComponent({
     },
     appId: {
       type: String,
-      default: null,
+      default: undefined,
       validator(value) {
         if (value) {
           warn(oldApiWarning);
         }
         return false;
       },
+    },
+    middlewares: {
+      type: Array,
+      default: null,
     },
   },
   data() {
@@ -77,11 +88,13 @@ export default createInstantSearchComponent({
         routing: this.routing,
         stalledSearchDelay: this.stalledSearchDelay,
         searchFunction: this.searchFunction,
+        onStateChange: this.onStateChange,
+        initialUiState: this.initialUiState,
       }),
     };
   },
-  render(createElement) {
-    return createElement(
+  render: renderCompat(function(h) {
+    return h(
       'div',
       {
         class: {
@@ -89,7 +102,7 @@ export default createInstantSearchComponent({
           [this.suit('', 'ssr')]: false,
         },
       },
-      this.$slots.default
+      getDefaultSlot(this)
     );
-  },
+  }),
 });

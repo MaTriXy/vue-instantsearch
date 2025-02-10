@@ -8,6 +8,7 @@
       :has-no-results="state.hasNoResults"
       :refine="state.refine"
       :current-refinement="state.currentRefinement"
+      :can-refine="state.canRefine"
     >
       <select
         :class="suit('select')"
@@ -35,11 +36,14 @@ export default {
   name: 'AisSortBy',
   mixins: [
     createSuitMixin({ name: 'SortBy' }),
-    createWidgetMixin({ connector: connectSortBy }),
+    createWidgetMixin(
+      { connector: connectSortBy },
+      {
+        $$widgetType: 'ais.sortBy',
+      }
+    ),
 
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => !state.hasNoResults,
-    }),
+    createPanelConsumerMixin(),
   ],
   props: {
     items: {
@@ -48,9 +52,7 @@ export default {
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   computed: {

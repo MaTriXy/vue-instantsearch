@@ -15,12 +15,13 @@ storiesOf('ais-search-box', module)
   .add('with custom rendering', () => ({
     template: `
       <ais-search-box autofocus>
-        <input
-          slot-scope="{ currentRefinement, refine }"
-          :value="currentRefinement"
-          @input="refine($event.currentTarget.value)"
-          placeholder="Custom SearchBox"
-        />
+        <template v-slot="{ currentRefinement, refine }">
+          <input
+            :value="currentRefinement"
+            @input="refine($event.currentTarget.value)"
+            placeholder="Custom SearchBox"
+          />
+        </template>
       </ais-search-box>
     `,
   }))
@@ -42,9 +43,9 @@ storiesOf('ais-search-box', module)
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">SearchBox</template>
+        <template v-slot:header>SearchBox</template>
         <ais-search-box />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

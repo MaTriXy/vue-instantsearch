@@ -1,16 +1,17 @@
 <template>
   <div
     v-if="state"
-    :class="[suit(), !canRefine && suit('', 'noRefinement')]"
+    :class="[suit(), !state.canRefine && suit('', 'noRefinement')]"
   >
     <slot
       :items="state.items"
-      :can-refine="canRefine"
+      :can-refine="state.canRefine"
       :can-toggle-show-more="state.canToggleShowMore"
       :is-showing-more="state.isShowingMore"
       :refine="state.refine"
       :createURL="state.createURL"
       :toggle-show-more="state.toggleShowMore"
+      :send-event="state.sendEvent"
     >
       <hierarchical-menu-list
         :items="state.items"
@@ -45,16 +46,19 @@ import { createPanelConsumerMixin } from '../mixins/panel';
 import HierarchicalMenuList from './HierarchicalMenuList.vue';
 import { createSuitMixin } from '../mixins/suit';
 
-const mapStateToCanRefine = state => state.items.length > 0;
-
 export default {
   name: 'AisHierarchicalMenu',
   mixins: [
     createSuitMixin({ name: 'HierarchicalMenu' }),
-    createWidgetMixin({ connector: connectHierarchicalMenu }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectHierarchicalMenu,
+      },
+      {
+        $$widgetType: 'ais.hierarchicalMenu',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   components: {
     HierarchicalMenuList,
@@ -66,11 +70,11 @@ export default {
     },
     limit: {
       type: Number,
-      default: 10,
+      default: undefined,
     },
     showMoreLimit: {
       type: Number,
-      default: 20,
+      default: undefined,
     },
     showMore: {
       type: Boolean,
@@ -78,27 +82,23 @@ export default {
     },
     sortBy: {
       type: [Array, Function],
-      default() {
-        return ['name:asc'];
-      },
+      default: undefined,
     },
     separator: {
       type: String,
-      default: ' > ',
+      default: undefined,
     },
     rootPath: {
       type: String,
-      default: null,
+      default: undefined,
     },
     showParentLevel: {
       type: Boolean,
-      default: true,
+      default: undefined,
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   computed: {
@@ -114,9 +114,6 @@ export default {
         sortBy: this.sortBy,
         transformItems: this.transformItems,
       };
-    },
-    canRefine() {
-      return mapStateToCanRefine(this.state);
     },
   },
 };

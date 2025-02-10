@@ -78,6 +78,7 @@
         <li
           :class="{
             [suit('item')]: true,
+            [suit('item', 'page')]: true,
             [suit('item', 'selected')]: state.currentRefinement === page
           }"
           v-for="page in state.pages"
@@ -174,15 +175,20 @@ export default {
   name: 'AisPagination',
   mixins: [
     createSuitMixin({ name: 'Pagination' }),
-    createWidgetMixin({ connector: connectPagination }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => state.nbPages > 1,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectPagination,
+      },
+      {
+        $$widgetType: 'ais.pagination',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     padding: {
       type: Number,
-      default: 3,
+      default: undefined,
       validator(value) {
         return value > 0;
       },
@@ -219,11 +225,12 @@ export default {
       };
     },
   },
+  emits: ['page-change'],
   methods: {
     refine(page) {
       const p = Math.min(Math.max(page, 0), this.state.nbPages - 1);
       this.state.refine(p);
-      // @TODO: do this in a general way
+      // TODO: do this in a general way
       this.$emit('page-change', p);
     },
   },

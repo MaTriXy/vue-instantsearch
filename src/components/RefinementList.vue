@@ -17,6 +17,7 @@
       :createURL="state.createURL"
       :is-from-search="state.isFromSearch"
       :can-refine="state.canRefine"
+      :send-event="state.sendEvent"
     >
       <div
         :class="suit('searchBox')"
@@ -109,10 +110,15 @@ export default {
   components: { SearchInput, AisHighlight },
   mixins: [
     createSuitMixin({ name: 'RefinementList' }),
-    createWidgetMixin({ connector: connectRefinementList }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => state.canRefine,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectRefinementList,
+      },
+      {
+        $$widgetType: 'ais.refinementList',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     attribute: {
@@ -121,12 +127,12 @@ export default {
     },
     searchable: {
       type: Boolean,
-      default: false,
+      default: undefined,
     },
     searchablePlaceholder: {
-      default: 'Search here…',
       type: String,
       required: false,
+      default: 'Search here…',
     },
     operator: {
       default: 'or',
@@ -137,28 +143,28 @@ export default {
     },
     limit: {
       type: Number,
-      default: 10,
       required: false,
+      default: undefined,
     },
     showMoreLimit: {
       type: Number,
-      default: 20,
       required: false,
+      default: undefined,
     },
     showMore: {
       type: Boolean,
-      default: false,
       required: false,
+      default: false,
     },
     sortBy: {
       type: [Array, Function],
-      default: () => ['isRefined', 'count:desc', 'name:asc'],
       required: false,
+      default: undefined,
     },
     transformItems: {
       type: Function,
-      default: items => items,
       required: false,
+      default: undefined,
     },
   },
   data() {

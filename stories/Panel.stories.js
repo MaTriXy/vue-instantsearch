@@ -6,6 +6,14 @@ storiesOf('ais-panel', module)
   .add('default', () => ({
     template: `
       <ais-panel>
+        <template v-slot:header>Brand</template>
+        <ais-refinement-list attribute="brand" />
+      </ais-panel>
+  `,
+  }))
+  .add('text content', () => ({
+    template: `
+      <ais-panel>
         This is the body of the Panel.
       </ais-panel>
     `,
@@ -13,7 +21,7 @@ storiesOf('ais-panel', module)
   .add('with header', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Header</template>
+        <template v-slot:header>Header</template>
         This is the body of the Panel.
       </ais-panel>
     `,
@@ -22,16 +30,16 @@ storiesOf('ais-panel', module)
     template: `
       <ais-panel>
         This is the body of the Panel.
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }))
   .add('with header & footer', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Header</template>
+        <template v-slot:header>Header</template>
         This is the body of the Panel.
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

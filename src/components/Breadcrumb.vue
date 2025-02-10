@@ -56,10 +56,15 @@ import { createWidgetMixin } from '../mixins/widget';
 export default {
   name: 'AisBreadcrumb',
   mixins: [
-    createWidgetMixin({ connector: connectBreadcrumb }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => state.canRefine,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectBreadcrumb,
+      },
+      {
+        $$widgetType: 'ais.breadcrumb',
+      }
+    ),
+    createPanelConsumerMixin(),
     createSuitMixin({ name: 'Breadcrumb' }),
   ],
   props: {
@@ -69,17 +74,15 @@ export default {
     },
     separator: {
       type: String,
-      default: ' > ',
+      default: undefined,
     },
     rootPath: {
       type: String,
-      default: null,
+      default: undefined,
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   computed: {

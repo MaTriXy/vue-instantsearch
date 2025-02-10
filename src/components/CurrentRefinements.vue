@@ -20,7 +20,7 @@
             :item="item"
             :createURL="state.createURL"
           >
-            <span :class="suit('label')">{{ item.label | capitalize }}: </span>
+            <span :class="suit('label')">{{ capitalize(item.label) }}: </span>
             <span
               v-for="refinement in item.refinements"
               :key="createItemKey(refinement)"
@@ -63,27 +63,28 @@ export default {
   name: 'AisCurrentRefinements',
   mixins: [
     createSuitMixin({ name: 'CurrentRefinements' }),
-    createWidgetMixin({ connector: connectCurrentRefinements }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => state.items.length > 0,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectCurrentRefinements,
+      },
+      {
+        $$widgetType: 'ais.currentRefinements',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
-    // no default because included and excluded are incompatible
-    // eslint-disable-next-line vue/require-default-prop
     includedAttributes: {
       type: Array,
+      default: undefined,
     },
-    // no default because included and excluded are incompatible
-    // eslint-disable-next-line vue/require-default-prop
     excludedAttributes: {
       type: Array,
+      default: undefined,
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   computed: {
@@ -102,8 +103,6 @@ export default {
     createItemKey({ attribute, value, type, operator }) {
       return [attribute, type, value, operator].join(':');
     },
-  },
-  filters: {
     capitalize(value) {
       if (!value) return '';
       return (

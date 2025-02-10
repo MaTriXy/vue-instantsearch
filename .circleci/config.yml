@@ -23,7 +23,7 @@ aliases:
 defaults: &defaults
   working_directory: ~/vue-instantsearch
   docker:
-    - image: circleci/node:8.15.1@sha256:3d32b8457083c33c04eb60fac02c0e39de5bd28de4b95393d7dcb5aa37b20af7
+    - image: cimg/node:12.22.6
 
 version: 2
 jobs:
@@ -38,8 +38,21 @@ jobs:
       - run:
           name: Build & Test packages size
           command: yarn test:build
+      - run:
+          name: Test module format Vue 2
+          command: |
+            node test/modules/vue2/package-is-es-module.mjs
+            node test/modules/vue2/package-is-cjs-module.cjs
+      - run:
+          name: Install Vue 3
+          command: ./scripts/test-vue3.sh
+      - run:
+          name: Test module format Vue 3
+          command: |
+            node test/modules/vue3/package-is-es-module.mjs
+            node test/modules/vue3/package-is-cjs-module.cjs
 
-  test_unit:
+  test_unit_vue2:
     <<: *defaults
     steps:
       - checkout
@@ -47,6 +60,21 @@ jobs:
       - restore_cache: *restore_yarn_cache
       - run: *run_yarn_install
       - save_cache: *save_yarn_cache
+      - run:
+          name: Lint & Code styles
+          command: yarn lint
+      - run:
+          name: Unit Tests
+          command: yarn test --maxWorkers=4
+
+  test_unit_vue3:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: *install_yarn_version
+      - run:
+          name: Install Vue 3
+          command: ./scripts/test-vue3.sh
       - run:
           name: Lint & Code styles
           command: yarn lint
@@ -65,13 +93,35 @@ jobs:
       - run:
           name: End-2-End tests
           command: |
-            yarn run examples:build
+            yarn examples:build e-commerce
             yarn run test:e2e:saucelabs
+      - store_test_results:
+          path: junit/wdio
+
+  shipjs_trigger:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: *install_yarn_version
+      - restore_cache: *restore_yarn_cache
+      - run: *run_yarn_install
+      - save_cache: *save_yarn_cache
+      - run:
+          name: Triggering Ship.js to Release
+          command: yarn shipjs trigger
 
 workflows:
   version: 2
   ci:
     jobs:
       - test_build
-      - test_unit
+      - test_unit_vue2
+      - test_unit_vue3
       - test_e2e
+  release_if_needed:
+    jobs:
+      - shipjs_trigger:
+          filters:
+            branches:
+              only:
+                - master

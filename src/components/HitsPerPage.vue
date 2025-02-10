@@ -7,6 +7,7 @@
       :items="state.items"
       :refine="state.refine"
       :hasNoResults="state.hasNoResults"
+      :canRefine="state.canRefine"
     >
       <select
         :class="suit('select')"
@@ -34,22 +35,24 @@ export default {
   name: 'AisHitsPerPage',
   mixins: [
     createSuitMixin({ name: 'HitsPerPage' }),
-    createWidgetMixin({ connector: connectHitsPerPage }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => !state.hasNoResults,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectHitsPerPage,
+      },
+      {
+        $$widgetType: 'ais.hitsPerPage',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     items: {
       type: Array,
       required: true,
-      default: () => [],
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   data() {

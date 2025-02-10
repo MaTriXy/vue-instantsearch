@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { mount } from '../../../test/utils';
 import { __setState } from '../../mixins/widget';
 import HitsPerPage from '../HitsPerPage.vue';
 
@@ -58,7 +58,7 @@ it('renders correctly', () => {
   expect(wrapper.html()).toMatchSnapshot();
 });
 
-it('calls `refine` with the `value` on `change`', () => {
+it('calls `refine` with the `value` on `change`', async () => {
   __setState({
     ...defaultState,
     refine: jest.fn(),
@@ -68,35 +68,11 @@ it('calls `refine` with the `value` on `change`', () => {
     propsData: defaultProps,
   });
 
-  // This is bad👇🏽 but the only way for now to trigger changes
-  // on a select: https://github.com/vuejs/vue-test-utils/issues/260
-  wrapper.vm.selected = 20;
+  await wrapper.setData({
+    selected: 20,
+  });
 
-  wrapper.find('select').trigger('change');
+  await wrapper.find('select').trigger('change');
 
   expect(wrapper.vm.state.refine).toHaveBeenLastCalledWith(20);
-});
-
-it('calls the Panel mixin with `hasNoResults`', () => {
-  __setState({
-    ...defaultState,
-    hasNoResults: false,
-  });
-
-  const wrapper = mount(HitsPerPage, {
-    propsData: defaultProps,
-  });
-
-  const mapStateToCanRefine = () =>
-    wrapper.vm.mapStateToCanRefine(wrapper.vm.state);
-
-  expect(mapStateToCanRefine()).toBe(true);
-
-  wrapper.setData({
-    state: {
-      hasNoResults: true,
-    },
-  });
-
-  expect(mapStateToCanRefine()).toBe(false);
 });

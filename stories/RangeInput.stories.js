@@ -39,7 +39,7 @@ storiesOf('ais-range-input', module)
   .add('with a custom render', () => ({
     template: `
       <ais-range-input attribute="price">
-        <template slot-scope="{ refine, currentRefinement }">
+        <template v-slot="{ refine, currentRefinement }">
           <form  @submit.prevent="refine({ min, max })" >
             <label>
               <input
@@ -76,7 +76,7 @@ storiesOf('ais-range-input', module)
     template: `
       <ais-range-input attribute="price">
         <template
-          slot-scope="{
+          v-slot="{
             refine,
             currentRefinement: { min: minValue, max: maxValue },
             range: { min: minRange, max: maxRange }
@@ -87,8 +87,8 @@ storiesOf('ais-range-input', module)
             :max="maxRange"
             :lazy="true"
             :value="[
-              minValue !== null ? minValue : minRange,
-              maxValue !== null ? maxValue : maxRange,
+              typeof minValue === 'number' ? minValue : minRange,
+              typeof maxValue === 'number' ? maxValue : maxRange,
             ]"
             @change="refine({ min: $event[0], max: $event[1] })"
           />
@@ -103,7 +103,7 @@ storiesOf('ais-range-input', module)
       <v-container mt-4>
         <ais-range-input attribute="price">
           <template
-            slot-scope="{
+            v-slot="{
               refine,
               currentRefinement: { min: minValue, max: maxValue },
               range: { min: minRange, max: maxRange }
@@ -113,8 +113,8 @@ storiesOf('ais-range-input', module)
               :min="minRange"
               :max="maxRange"
               :value="[
-                minValue !== null ? minValue : minRange,
-                maxValue !== null ? maxValue : maxRange,
+                typeof minValue === 'number' ? minValue : minRange,
+                typeof maxValue === 'number' ? maxValue : maxRange,
               ]"
               @input="refine({min: $event[0], max: $event[1]})"
               thumb-label="always"
@@ -128,9 +128,9 @@ storiesOf('ais-range-input', module)
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Range Input</template>
+        <template v-slot:header>Range Input</template>
         <ais-range-input attribute="price" />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

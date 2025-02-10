@@ -1,13 +1,14 @@
 <template>
   <div
     v-if="state"
-    :class="[suit(), !canRefine && suit('', 'noRefinement')]"
+    :class="[suit(), !state.canRefine && suit('', 'noRefinement')]"
   >
     <slot
       :items="state.items"
-      :can-refine="canRefine"
+      :can-refine="state.canRefine"
       :refine="state.refine"
       :createURL="state.createURL"
+      :send-event="state.sendEvent"
     >
       <ul :class="[suit('list')]">
         <li
@@ -41,11 +42,16 @@ import { createSuitMixin } from '../mixins/suit';
 export default {
   name: 'AisNumericMenu',
   mixins: [
-    createWidgetMixin({ connector: connectNumericMenu }),
+    createWidgetMixin(
+      {
+        connector: connectNumericMenu,
+      },
+      {
+        $$widgetType: 'ais.numericMenu',
+      }
+    ),
     createSuitMixin({ name: 'NumericMenu' }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => !state.hasNoResults,
-    }),
+    createPanelConsumerMixin(),
   ],
   props: {
     attribute: {
@@ -58,9 +64,7 @@ export default {
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   computed: {
@@ -70,9 +74,6 @@ export default {
         transformItems: this.transformItems,
         items: this.items,
       };
-    },
-    canRefine() {
-      return !this.state.hasNoResults;
     },
   },
 };

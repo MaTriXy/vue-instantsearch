@@ -5,6 +5,9 @@ export {
 } from './components/ClearRefinements.vue';
 export { default as AisConfigure } from './components/Configure';
 export {
+  default as AisExperimentalConfigureRelatedItems,
+} from './components/ConfigureRelatedItems';
+export {
   default as AisCurrentRefinements,
 } from './components/CurrentRefinements.vue';
 export {
@@ -13,6 +16,7 @@ export {
 export { default as AisHighlight } from './components/Highlight.vue';
 export { default as AisHits } from './components/Hits.vue';
 export { default as AisHitsPerPage } from './components/HitsPerPage.vue';
+export { default as AisIndex } from './components/Index';
 export { default as AisInstantSearch } from './components/InstantSearch';
 export { default as AisInstantSearchSsr } from './components/InstantSearchSsr';
 export { default as AisInfiniteHits } from './components/InfiniteHits.vue';
@@ -38,3 +42,8 @@ export {
   default as AisToggleRefinement,
 } from './components/ToggleRefinement.vue';
 export { default as AisVoiceSearch } from './components/VoiceSearch.vue';
+export { default as AisRelevantSort } from './components/RelevantSort.vue';
+export { default as AisDynamicWidgets } from './components/DynamicWidgets';
+export {
+  default as AisExperimentalDynamicWidgets,
+} from './components/ExperimentalDynamicWidgets';

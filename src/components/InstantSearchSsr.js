@@ -1,24 +1,22 @@
 import { createInstantSearchComponent } from '../util/createInstantSearchComponent';
+import { renderCompat, getDefaultSlot } from '../util/vue-compat';
 
 export default createInstantSearchComponent({
   name: 'AisInstantSearchSsr',
   inject: {
-    // should be possible to configure this with {camelcase: ['error', {allow: ['^\\$_']}]}
-    // but that didn't work
-    // eslint-disable-next-line camelcase
-    $_ais: {
+    $_ais_ssrInstantSearchInstance: {
       default() {
-        throw new Error('`rootMixin` is required when using SSR.');
+        throw new Error('`createServerRootMixin` is required when using SSR.');
       },
     },
   },
   data() {
     return {
-      instantSearchInstance: this.$_ais,
+      instantSearchInstance: this.$_ais_ssrInstantSearchInstance,
     };
   },
-  render(createElement) {
-    return createElement(
+  render: renderCompat(function(h) {
+    return h(
       'div',
       {
         class: {
@@ -26,7 +24,7 @@ export default createInstantSearchComponent({
           [this.suit('', 'ssr')]: true,
         },
       },
-      this.$slots.default
+      getDefaultSlot(this)
     );
-  },
+  }),
 });

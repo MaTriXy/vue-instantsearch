@@ -1,5 +1,5 @@
 import SearchBox from '../SearchBox.vue';
-import { mount } from '@vue/test-utils';
+import { mount, htmlCompat } from '../../../test/utils';
 import { __setState } from '../../mixins/widget';
 jest.mock('../../mixins/widget');
 
@@ -9,7 +9,7 @@ test('renders HTML correctly', () => {
   __setState(defaultState);
   const wrapper = mount(SearchBox);
 
-  expect(wrapper.html()).toMatchSnapshot();
+  expect(wrapper.htmlCompat()).toMatchSnapshot();
 });
 
 test('with autofocus', () => {
@@ -20,9 +20,7 @@ test('with autofocus', () => {
     },
   });
 
-  expect(wrapper.find('.ais-SearchBox-input').attributes().autofocus).toBe(
-    'autofocus'
-  );
+  expect(wrapper.find('.ais-SearchBox-input')).toBeAutofocused();
 });
 
 test('with placeholder', () => {
@@ -69,9 +67,7 @@ test('with reset button hidden without refinement', () => {
 
   const wrapper = mount(SearchBox);
 
-  expect(wrapper.find('.ais-SearchBox-reset').attributes().hidden).toBe(
-    'hidden'
-  );
+  expect(wrapper.find('.ais-SearchBox-reset')).toBeHidden();
 });
 
 test('with reset button visible with refinement', () => {
@@ -82,9 +78,7 @@ test('with reset button visible with refinement', () => {
 
   const wrapper = mount(SearchBox);
 
-  expect(
-    wrapper.find('.ais-SearchBox-reset').attributes().hidden
-  ).toBeUndefined();
+  expect(wrapper.find('.ais-SearchBox-reset')).not.toBeHidden();
 });
 
 test('with stalled search hides the submit, reset and displays the loader', () => {
@@ -99,30 +93,22 @@ test('with stalled search hides the submit, reset and displays the loader', () =
     },
   });
 
-  expect(wrapper.find('.ais-SearchBox-submit').attributes().hidden).toBe(
-    'hidden'
-  );
+  expect(wrapper.find('.ais-SearchBox-submit')).toBeHidden();
 
-  expect(wrapper.find('.ais-SearchBox-reset').attributes().hidden).toBe(
-    'hidden'
-  );
+  expect(wrapper.find('.ais-SearchBox-reset')).toBeHidden();
 
-  expect(wrapper.contains('.ais-SearchBox-loadingIndicator')).toBe(true);
+  expect(wrapper.find('.ais-SearchBox-loadingIndicator').exists()).toBe(true);
 });
 
 test('with stalled search but no `showLoadingIndicator` displays the submit and hides reset, loader', () => {
   __setState({ ...defaultState, isSearchStalled: true });
   const wrapper = mount(SearchBox);
 
-  expect(
-    wrapper.find('.ais-SearchBox-submit').attributes().hidden
-  ).toBeUndefined();
+  expect(wrapper.find('.ais-SearchBox-submit')).not.toBeHidden();
 
-  expect(wrapper.find('.ais-SearchBox-reset').attributes().hidden).toBe(
-    'hidden'
-  );
+  expect(wrapper.find('.ais-SearchBox-reset')).toBeHidden();
 
-  expect(wrapper.contains('.ais-SearchBox-loadingIndicator')).toBe(false);
+  expect(wrapper.find('.ais-SearchBox-loadingIndicator').exists()).toBe(false);
 });
 
 test('with not stalled search displays the submit and hides reset, loader', () => {
@@ -133,38 +119,47 @@ test('with not stalled search displays the submit and hides reset, loader', () =
     },
   });
 
-  expect(
-    wrapper.find('.ais-SearchBox-submit').attributes().hidden
-  ).toBeUndefined();
+  expect(wrapper.find('.ais-SearchBox-submit')).not.toBeHidden();
 
-  expect(wrapper.find('.ais-SearchBox-reset').attributes().hidden).toBe(
-    'hidden'
-  );
+  expect(wrapper.find('.ais-SearchBox-reset')).toBeHidden();
 
-  expect(
-    wrapper.find('.ais-SearchBox-loadingIndicator').attributes().hidden
-  ).toBe('hidden');
+  expect(wrapper.find('.ais-SearchBox-loadingIndicator')).toBeHidden();
 });
 
-test('blurs input on form submit', () => {
+test('blurs input on form submit', async () => {
   __setState(defaultState);
   const wrapper = mount(SearchBox);
   const input = wrapper.find('.ais-SearchBox-input');
   input.element.blur = jest.fn();
 
-  wrapper.find('.ais-SearchBox-form').trigger('submit');
+  await wrapper.find('.ais-SearchBox-form').trigger('submit');
 
   expect(input.element.blur).toHaveBeenCalledTimes(1);
 });
 
-test('refine on empty string on form reset', () => {
+test('refine on empty string on form reset', async () => {
   const state = { ...defaultState, refine: jest.fn() };
   __setState(state);
   const wrapper = mount(SearchBox);
 
-  wrapper.find('.ais-SearchBox-form').trigger('reset');
+  await wrapper.find('.ais-SearchBox-form').trigger('reset');
 
   expect(state.refine).toHaveBeenCalledWith('');
+});
+
+test('keep local query when out of sync and input is focused', async () => {
+  const state = { ...defaultState, refine: jest.fn() };
+  __setState(state);
+
+  const wrapper = mount(SearchBox, { attachTo: document.body });
+  const input = wrapper.find('.ais-SearchBox-input');
+  input.element.focus();
+  await input.setValue('hello');
+
+  await wrapper.setData({ state: { query: 'hel' } });
+
+  expect(input.element.value).toBe('hello');
+  expect(state.refine).toHaveBeenLastCalledWith('hello');
 });
 
 test('overriding slots', () => {
@@ -172,15 +167,28 @@ test('overriding slots', () => {
     ...defaultState,
     isSearchStalled: true,
   });
-  const wrapper = mount(SearchBox, {
-    propsData: {
-      showLoadingIndicator: true,
+  const wrapper = mount({
+    components: { SearchBox },
+    data() {
+      return {
+        props: {
+          showLoadingIndicator: true,
+        },
+      };
     },
-    slots: {
-      'submit-icon': '<span>SUBMIT</span>',
-      'reset-icon': '<span>RESET</span>',
-      'loading-indicator': '<span>LOADING...</span>',
-    },
+    template: `
+      <SearchBox v-bind="props">
+        <template v-slot:submit-icon>
+          <span>SUBMIT</span>
+        </template>
+        <template v-slot:reset-icon>
+          <span>RESET</span>
+        </template>
+        <template v-slot:loading-indicator>
+          <span>LOADING...</span>
+        </template>
+      </SearchBox>
+    `,
   });
 
   expect(wrapper.find('.ais-SearchBox-submit').html()).toMatch(/SUBMIT/);
@@ -189,40 +197,36 @@ test('overriding slots', () => {
     /LOADING.../
   );
 
-  expect(wrapper.find('.ais-SearchBox-submit').html()).toMatchInlineSnapshot(`
-
-<button type="submit"
-        title="Search"
+  expect(htmlCompat(wrapper.find('.ais-SearchBox-submit').html()))
+    .toMatchInlineSnapshot(`
+<button class="ais-SearchBox-submit"
         hidden="hidden"
-        class="ais-SearchBox-submit"
+        title="Search"
+        type="submit"
 >
   <span>
     SUBMIT
   </span>
 </button>
-
 `);
-  expect(wrapper.find('.ais-SearchBox-reset').html()).toMatchInlineSnapshot(`
-
-<button type="reset"
-        title="Clear"
+  expect(htmlCompat(wrapper.find('.ais-SearchBox-reset').html()))
+    .toMatchInlineSnapshot(`
+<button class="ais-SearchBox-reset"
         hidden="hidden"
-        class="ais-SearchBox-reset"
+        title="Clear"
+        type="reset"
 >
   <span>
     RESET
   </span>
 </button>
-
 `);
   expect(wrapper.find('.ais-SearchBox-loadingIndicator').html())
     .toMatchInlineSnapshot(`
-
 <span class="ais-SearchBox-loadingIndicator">
   <span>
     LOADING...
   </span>
 </span>
-
 `);
 });

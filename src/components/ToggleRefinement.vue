@@ -1,13 +1,14 @@
 <template>
   <div
     v-if="state"
-    :class="[suit(), !canRefine && suit('', 'noRefinement')]"
+    :class="[suit(), !state.canRefine && suit('', 'noRefinement')]"
   >
     <slot
       :value="state.value"
-      :can-refine="canRefine"
+      :can-refine="state.canRefine"
       :refine="state.refine"
       :createURL="state.createURL"
+      :send-event="state.sendEvent"
     >
       <label :class="suit('label')">
         <input
@@ -34,16 +35,19 @@ import { createWidgetMixin } from '../mixins/widget';
 import { createPanelConsumerMixin } from '../mixins/panel';
 import { createSuitMixin } from '../mixins/suit';
 
-const mapStateToCanRefine = state => Boolean(state.value.count);
-
 export default {
   name: 'AisToggleRefinement',
   mixins: [
     createSuitMixin({ name: 'ToggleRefinement' }),
-    createWidgetMixin({ connector: connectToggleRefinement }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine,
-    }),
+    createWidgetMixin(
+      {
+        connector: connectToggleRefinement,
+      },
+      {
+        $$widgetType: 'ais.toggleRefinement',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     attribute: {
@@ -55,15 +59,13 @@ export default {
       required: true,
     },
     on: {
-      type: [String, Number, Boolean],
+      type: [String, Number, Boolean, Array],
       required: false,
       default: true,
     },
     off: {
-      type: [String, Number, Boolean],
+      type: [String, Number, Boolean, Array],
       required: false,
-      // explicit otherwise Vue coerces the default value
-      // to false because of the `Boolean` prop type
       default: undefined,
     },
   },
@@ -75,9 +77,6 @@ export default {
         on: this.on,
         off: this.off,
       };
-    },
-    canRefine() {
-      return mapStateToCanRefine(this.state);
     },
   },
 };

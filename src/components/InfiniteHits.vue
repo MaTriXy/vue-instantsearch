@@ -26,6 +26,7 @@
       :refine-next="refineNext"
       :refine="refineNext"
       :insights="state.insights"
+      :send-event="state.sendEvent"
     >
       <ol :class="suit('list')">
         <li
@@ -67,7 +68,14 @@ import { createSuitMixin } from '../mixins/suit';
 export default {
   name: 'AisInfiniteHits',
   mixins: [
-    createWidgetMixin({ connector: connectInfiniteHitsWithInsights }),
+    createWidgetMixin(
+      {
+        connector: connectInfiniteHitsWithInsights,
+      },
+      {
+        $$widgetType: 'ais.infiniteHits',
+      }
+    ),
     createSuitMixin({ name: 'InfiniteHits' }),
   ],
   props: {
@@ -81,9 +89,11 @@ export default {
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
+    },
+    cache: {
+      type: Object,
+      default: undefined,
     },
   },
   computed: {
@@ -92,6 +102,7 @@ export default {
         showPrevious: this.showPrevious,
         escapeHTML: this.escapeHTML,
         transformItems: this.transformItems,
+        cache: this.cache,
       };
     },
     items() {

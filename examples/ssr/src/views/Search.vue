@@ -4,10 +4,7 @@
     <ais-stats />
     <ais-refinement-list attribute="brand" />
     <ais-hits>
-      <template
-        slot="item"
-        slot-scope="{ item }"
-      >
+      <template v-slot:item="{ item }">
         <p>
           <ais-highlight
             attribute="name"
@@ -38,14 +35,6 @@ import {
 } from 'vue-instantsearch';
 
 export default {
-  asyncData({ instantsearch }) {
-    return instantsearch.findResultsState({
-      query: 'iphone',
-      hitsPerPage: 5,
-      disjunctiveFacets: ['brand'],
-      disjunctiveFacetsRefinements: { brand: ['Apple'] },
-    });
-  },
   components: {
     AisInstantSearchSsr,
     AisRefinementList,

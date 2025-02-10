@@ -8,6 +8,7 @@
       :can-refine="state.canRefine"
       :refine="refine"
       :createURL="state.createURL"
+      :send-event="state.sendEvent"
     >
       <select
         :class="suit('select')"
@@ -46,10 +47,13 @@ export default {
   name: 'AisMenuSelect',
   mixins: [
     createSuitMixin({ name: 'MenuSelect' }),
-    createWidgetMixin({ connector: connectMenu }),
-    createPanelConsumerMixin({
-      mapStateToCanRefine: state => state.canRefine,
-    }),
+    createWidgetMixin(
+      { connector: connectMenu },
+      {
+        $$widgetType: 'ais.menuSelect',
+      }
+    ),
+    createPanelConsumerMixin(),
   ],
   props: {
     attribute: {
@@ -62,9 +66,7 @@ export default {
     },
     sortBy: {
       type: [Array, Function],
-      default() {
-        return ['name:asc'];
-      },
+      default: undefined,
     },
     transformItems: {
       type: Function,

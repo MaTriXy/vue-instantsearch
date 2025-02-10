@@ -32,7 +32,7 @@ storiesOf('ais-breadcrumb', module)
   .add('with a custom root label', () => ({
     template: `
       <ais-breadcrumb :attributes="attributes">
-        <template slot="rootLabel">Home Page</template>
+        <template v-slot:rootLabel>Home Page</template>
       </ais-breadcrumb>
     `,
     data: () => ({
@@ -42,7 +42,7 @@ storiesOf('ais-breadcrumb', module)
   .add('with a custom separator', () => ({
     template: `
       <ais-breadcrumb :attributes="attributes">
-        <template slot="separator" slot-scope="_">~</template>
+        <template v-slot:separator>~</template>
       </ais-breadcrumb>
     `,
     data: () => ({
@@ -55,7 +55,7 @@ storiesOf('ais-breadcrumb', module)
         :attributes="attributes"
         :transformItems="transformItems"
       >
-        <template slot="rootLabel">HOME</template>
+        <template v-slot:rootLabel>HOME</template>
       </ais-breadcrumb>
     `,
     data: () => ({
@@ -74,33 +74,35 @@ storiesOf('ais-breadcrumb', module)
   .add('with a custom render', () => ({
     template: `
       <ais-breadcrumb :attributes="attributes">
-        <ul slot-scope="{ items, refine, createURL }">
-          <li>
-            <a
-              v-if="Boolean(items.length)"
-              :href="createURL()"
-              @click.prevent="refine()"
+        <template v-slot="{ items, refine, createURL }">
+          <ul>
+            <li>
+              <a
+                v-if="Boolean(items.length)"
+                :href="createURL()"
+                @click.prevent="refine()"
+              >
+                Home
+              </a>
+              <span v-else>
+                Home
+              </span>
+            </li>
+            <li
+              v-for="(item, index) in items"
+              :key="item.label"
             >
-              Home
-            </a>
-            <span v-else>
-              Home
-            </span>
-          </li>
-          <li
-            v-for="(item, index) in items"
-            :key="item.label"
-          >
-            <a
-              :href="createURL(item.value)"
-              @click.prevent="refine(item.value)"
-            >
-              <component :is="index === items.length -1 ? 'strong' : 'span'">
-                {{ item.label }}
-              </component>
-            </a>
-          </li>
-        </ul>
+              <a
+                :href="createURL(item.value)"
+                @click.prevent="refine(item.value)"
+              >
+                <component :is="index === items.length -1 ? 'strong' : 'span'">
+                  {{ item.label }}
+                </component>
+              </a>
+            </li>
+          </ul>
+        </template>
       </ais-breadcrumb>
     `,
     data: () => ({
@@ -110,9 +112,9 @@ storiesOf('ais-breadcrumb', module)
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Breadcrumb</template>
+        <template v-slot:header>Breadcrumb</template>
         <ais-breadcrumb :attributes="attributes" />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
     data: () => ({

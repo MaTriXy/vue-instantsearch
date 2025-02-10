@@ -62,7 +62,7 @@ storiesOf('ais-hierarchical-menu', module)
         :show-more-limit="5"
         :showMore="true"
       >
-        <template slot="showMoreLabel" slot-scope="{ isShowingMore }">
+        <template v-slot:showMoreLabel="{ isShowingMore }">
           {{ isShowingMore ? 'View less' : 'View more' }}
         </template>
       </ais-hierarchical-menu>
@@ -89,55 +89,57 @@ storiesOf('ais-hierarchical-menu', module)
           'hierarchicalCategories.lvl2',
         ]"
       >
-        <ol slot-scope="{ items, refine, createURL }">
-          <li
-            v-for="item in items"
-            :key="item.value"
-            :style="{ fontWeight: item.isRefined ? 600 : 400 }"
-          >
-            <a
-              :href="createURL(item.value)"
-              @click.prevent="refine(item.value)"
+        <template v-slot="{ items, refine, createURL }">
+          <ol>
+            <li
+              v-for="item in items"
+              :key="item.value"
+              :style="{ fontWeight: item.isRefined ? 600 : 400 }"
             >
-              {{item.label}} - {{item.count}}
-            </a>
-            <ol v-if="item.data">
-              <li
-                v-for="child in item.data"
-                :key="child.value"
-                :style="{ fontWeight: child.isRefined ? 600 : 400 }"
+              <a
+                :href="createURL(item.value)"
+                @click.prevent="refine(item.value)"
               >
-                <a
-                  :href="createURL(child.value)"
-                  @click.prevent="refine(child.value)"
+                {{item.label}} - {{item.count}}
+              </a>
+              <ol v-if="item.data">
+                <li
+                  v-for="child in item.data"
+                  :key="child.value"
+                  :style="{ fontWeight: child.isRefined ? 600 : 400 }"
                 >
-                  {{child.label}} - {{child.count}}
-                </a>
-                <ol v-if="child.data">
-                  <li
-                    v-for="subchild in child.data"
-                    :key="subchild.value"
-                    :style="{ fontWeight: subchild.isRefined ? 600 : 400 }"
+                  <a
+                    :href="createURL(child.value)"
+                    @click.prevent="refine(child.value)"
                   >
-                    <a
-                      :href="createURL(subchild.value)"
-                      @click.prevent="refine(subchild.value)"
+                    {{child.label}} - {{child.count}}
+                  </a>
+                  <ol v-if="child.data">
+                    <li
+                      v-for="subchild in child.data"
+                      :key="subchild.value"
+                      :style="{ fontWeight: subchild.isRefined ? 600 : 400 }"
                     >
-                      {{subchild.label}} - {{subchild.count}}
-                    </a>
-                  </li>
-                </ol>
-              </li>
-            </ol>
-          </li>
-        </ol>
+                      <a
+                        :href="createURL(subchild.value)"
+                        @click.prevent="refine(subchild.value)"
+                      >
+                        {{subchild.label}} - {{subchild.count}}
+                      </a>
+                    </li>
+                  </ol>
+                </li>
+              </ol>
+            </li>
+          </ol>
+        </template>
       </ais-hierarchical-menu>
     `,
   }))
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Hierarchical Menu</template>
+        <template v-slot:header>Hierarchical Menu</template>
         <ais-hierarchical-menu
           :attributes="[
             'hierarchicalCategories.lvl0',
@@ -145,7 +147,7 @@ storiesOf('ais-hierarchical-menu', module)
             'hierarchicalCategories.lvl2',
           ]"
         />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

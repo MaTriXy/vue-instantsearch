@@ -16,7 +16,7 @@ storiesOf('ais-rating-menu', module)
     template: `
       <div>
         <ais-rating-menu attribute="rating">
-          <template slot-scope="{ items, refine }">
+          <template v-slot="{ items, refine }">
             rating
             <ul>
               <li v-for="(item, key) in items" :key="key">
@@ -32,9 +32,9 @@ storiesOf('ais-rating-menu', module)
   .add('with a Panel', () => ({
     template: `
       <ais-panel>
-        <template slot="header">Rating Menu</template>
+        <template v-slot:header>Rating Menu</template>
         <ais-rating-menu attribute="rating" />
-        <template slot="footer">Footer</template>
+        <template v-slot:footer>Footer</template>
       </ais-panel>
     `,
   }));

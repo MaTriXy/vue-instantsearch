@@ -6,6 +6,7 @@
     <slot
       :items="items"
       :insights="state.insights"
+      :send-event="state.sendEvent"
     >
       <ol :class="suit('list')">
         <li
@@ -33,7 +34,14 @@ import { createSuitMixin } from '../mixins/suit';
 export default {
   name: 'AisHits',
   mixins: [
-    createWidgetMixin({ connector: connectHitsWithInsights }),
+    createWidgetMixin(
+      {
+        connector: connectHitsWithInsights,
+      },
+      {
+        $$widgetType: 'ais.hits',
+      }
+    ),
     createSuitMixin({ name: 'Hits' }),
   ],
   props: {
@@ -43,9 +51,7 @@ export default {
     },
     transformItems: {
       type: Function,
-      default(items) {
-        return items;
-      },
+      default: undefined,
     },
   },
   computed: {

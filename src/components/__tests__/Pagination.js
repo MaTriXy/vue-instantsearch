@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { mount } from '../../../test/utils';
 import { __setState } from '../../mixins/widget';
 import Pagination from '../Pagination.vue';
 
@@ -78,7 +78,7 @@ it('renders correctly last page', () => {
   expect(wrapper.html()).toMatchSnapshot();
 });
 
-it('Moves to the first page on that button', () => {
+it('Moves to the first page on that button', async () => {
   __setState({
     ...defaultState,
     isFirstPage: false,
@@ -88,11 +88,11 @@ it('Moves to the first page on that button', () => {
   const firstPage = wrapper.find(
     '.ais-Pagination-item--firstPage .ais-Pagination-link'
   );
-  firstPage.trigger('click');
+  await firstPage.trigger('click');
   expect(wrapper.vm.state.refine).toHaveBeenLastCalledWith(0);
 });
 
-it('Moves to the next page on that button', () => {
+it('Moves to the next page on that button', async () => {
   const currentRefinement = 5;
   __setState({
     ...defaultState,
@@ -103,13 +103,13 @@ it('Moves to the next page on that button', () => {
   const nextPage = wrapper.find(
     '.ais-Pagination-item--nextPage .ais-Pagination-link'
   );
-  nextPage.trigger('click');
+  await nextPage.trigger('click');
   expect(wrapper.vm.state.refine).toHaveBeenLastCalledWith(
     currentRefinement + 1
   );
 });
 
-it('Moves to the last page on that button', () => {
+it('Moves to the last page on that button', async () => {
   const nbPages = 1000;
   __setState({
     ...defaultState,
@@ -121,11 +121,11 @@ it('Moves to the last page on that button', () => {
   const lastPage = wrapper.find(
     '.ais-Pagination-item--lastPage .ais-Pagination-link'
   );
-  lastPage.trigger('click');
+  await lastPage.trigger('click');
   expect(wrapper.vm.state.refine).toHaveBeenLastCalledWith(nbPages - 1);
 });
 
-it('Moves to the previous page on that button', () => {
+it('Moves to the previous page on that button', async () => {
   const currentRefinement = 5;
   __setState({
     ...defaultState,
@@ -137,32 +137,13 @@ it('Moves to the previous page on that button', () => {
   const previousPage = wrapper.find(
     '.ais-Pagination-item--previousPage .ais-Pagination-link'
   );
-  previousPage.trigger('click');
+  await previousPage.trigger('click');
   expect(wrapper.vm.state.refine).toHaveBeenLastCalledWith(
     currentRefinement - 1
   );
 });
 
-it('calls the Panel mixin with `nbPages`', () => {
-  __setState({ ...defaultState });
-
-  const wrapper = mount(Pagination);
-
-  const mapStateToCanRefine = () =>
-    wrapper.vm.mapStateToCanRefine(wrapper.vm.state);
-
-  expect(mapStateToCanRefine()).toBe(true);
-
-  wrapper.setData({
-    state: {
-      nbPages: 1,
-    },
-  });
-
-  expect(mapStateToCanRefine()).toBe(false);
-});
-
-it('implements showFirst', () => {
+it('implements showFirst', async () => {
   __setState({ ...defaultState });
 
   const wrapper = mount(Pagination, {
@@ -173,14 +154,14 @@ it('implements showFirst', () => {
 
   expect(wrapper.find('.ais-Pagination-item--firstPage').exists()).toBe(false);
 
-  wrapper.setProps({
+  await wrapper.setProps({
     showFirst: true,
   });
 
   expect(wrapper.find('.ais-Pagination-item--firstPage').exists()).toBe(true);
 });
 
-it('implements showPrevious', () => {
+it('implements showPrevious', async () => {
   __setState({ ...defaultState });
 
   const wrapper = mount(Pagination, {
@@ -193,7 +174,7 @@ it('implements showPrevious', () => {
     false
   );
 
-  wrapper.setProps({
+  await wrapper.setProps({
     showPrevious: true,
   });
 
@@ -202,7 +183,7 @@ it('implements showPrevious', () => {
   );
 });
 
-it('implements showLast', () => {
+it('implements showLast', async () => {
   __setState({ ...defaultState });
 
   const wrapper = mount(Pagination, {
@@ -213,14 +194,14 @@ it('implements showLast', () => {
 
   expect(wrapper.find('.ais-Pagination-item--lastPage').exists()).toBe(false);
 
-  wrapper.setProps({
+  await wrapper.setProps({
     showLast: true,
   });
 
   expect(wrapper.find('.ais-Pagination-item--lastPage').exists()).toBe(true);
 });
 
-it('implements showNext', () => {
+it('implements showNext', async () => {
   __setState({ ...defaultState });
 
   const wrapper = mount(Pagination, {
@@ -231,7 +212,7 @@ it('implements showNext', () => {
 
   expect(wrapper.find('.ais-Pagination-item--nextPage').exists()).toBe(false);
 
-  wrapper.setProps({
+  await wrapper.setProps({
     showNext: true,
   });
 

@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { mount } from '../../../test/utils';
 import RatingMenu from '../RatingMenu.vue';
 import { __setState } from '../../mixins/widget';
 
@@ -85,7 +85,7 @@ it('renders correctly when refined', () => {
   expect(wrapper.html()).toMatchSnapshot();
 });
 
-it('calls refine when clicked on link', () => {
+it('calls refine when clicked on link', async () => {
   __setState({
     createURL: () => '#',
     items: [
@@ -121,28 +121,35 @@ it('calls refine when clicked on link', () => {
     propsData: defaultProps,
   });
 
-  wrapper.find('.ais-RatingMenu-link').trigger('click');
+  await wrapper.find('.ais-RatingMenu-link').trigger('click');
 
   expect(wrapper.vm.state.refine).toHaveBeenLastCalledWith('1');
 });
 
-it('calls the Panel mixin with `hasNoResults`', () => {
-  __setState({ hasNoResults: false });
-
-  const wrapper = mount(RatingMenu, {
-    propsData: defaultProps,
+it('exposes send-event method for insights middleware', async () => {
+  const sendEvent = jest.fn();
+  __setState({
+    createURL: () => '#',
+    items: [],
+    sendEvent,
   });
 
-  const mapStateToCanRefine = () =>
-    wrapper.vm.mapStateToCanRefine(wrapper.vm.state);
-
-  expect(mapStateToCanRefine()).toBe(true);
-
-  wrapper.setData({
-    state: {
-      hasNoResults: true,
+  const wrapper = mount({
+    components: { RatingMenu },
+    data() {
+      return { props: defaultProps };
     },
+    template: `
+      <RatingMenu v-bind="props">
+        <template v-slot="{ sendEvent }">
+          <div>
+            <button @click="sendEvent()">Send Event</button>
+          </div>
+        </template>
+      </RatingMenu>
+    `,
   });
 
-  expect(mapStateToCanRefine()).toBe(false);
+  await wrapper.find('button').trigger('click');
+  expect(sendEvent).toHaveBeenCalledTimes(1);
 });
